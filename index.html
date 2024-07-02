@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>World Bank Country Data Map</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map { height: calc(100vh - 115px); }
+        .legend {
+            background: white;
+            padding: 10px;
+            line-height: 1.5;
+        }
+        .legend i {
+            width: 18px;
+            height: 18px;
+            float: left;
+            margin-right: 8px;
+            opacity: 0.7;
+        }
+        .search-container {
+            padding: 10px;
+            background: white;
+            position: relative;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+        }
+        .info-container {
+            padding: 10px;
+            background: white;
+            position: relative;
+            z-index: 1000;
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="search-container">
+        <input type="text" id="countrySearch" placeholder="Enter country name" />
+        <button onclick="searchCountry()">Search</button>
+        <div class="info-container">
+            <strong>HDI Growth Definition</strong><br>
+            The Human Development Index (HDI) is a summary measure of average achievement in key dimensions of human development: a long and healthy life, being knowledgeable, and having a decent standard of living. The higher the HDI, means the better standard of living.<br>
+        </div>
+    </div>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        // Initialize the map
+        var map = L.map('map').setView([20, 0], 2);
+
+        // Add a tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // HDI color function based on the provided map
+        function getColor(d) {
+            return d > 0.8 ? '#08306b' :
+                   d > 0.75 ? '#08519c' :
+                   d > 0.5  ? '#3182bd' :
+                   d > 0.25 ? '#6baed6' :
+                   '#c6dbef';
+        }
+
+        // Store country data globally for search functionality
+        var countryData = [];
+
+        // Fetch country data from the API
+        fetch('/countries/')
+            .then(response => response.json())
+            .then(data => {
+                countryData = data;
+                data.forEach(country => {
+                    if (country.latitude && country.longitude) {
+                        var hdi = country['HDI'] ? country['HDI'].toFixed(2) : 'N/A';
+                        var color = getColor(country['HDI']);
+                        var circle = L.circleMarker([country.latitude, country.longitude], {
+                            radius: 8,
+                            fillColor: color,
+                            color: color,
+                            weight: 1,
+                            opacity: 1,
+                            fillOpacity: 0.8
+                        }).addTo(map);
+
+                        circle.bindPopup(`
+                            <b>${country.name}</b><br>
+                            Population: ${country['Population, total']}<br>
+                           
+                            Population growth: ${country['Population growth']}%<br>
+                            Net migration: ${country['Net migration']}<br>
+                            
+                            Estimated Human Development Index (HDI): ${hdi}
+                        `);
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching country data:', error);
+            });
+
+        // Add a legend
+        var legend = L.control({ position: 'bottomright' });
+
+        legend.onAdd = function (map) {
+            var div = L.DomUtil.create('div', 'legend'),
+                grades = [0, 0.25, 0.5, 0.75, 0.8],
+                labels = [];
+
+            div.innerHTML += '<strong>HDI Legend</strong><br>';
+            // Loop through our HDI intervals and generate a label with a colored square for each interval
+            for (var i = 0; i < grades.length; i++) {
+                div.innerHTML +=
+                    '<i style="background:' + getColor(grades[i] + 0.01) + '"></i> ' +
+                    grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+            }
+
+            return div;
+        };
+
+        legend.addTo(map);
+
+        // Search function to locate and zoom to a country
+        function searchCountry() {
+            var searchInput = document.getElementById('countrySearch').value.toLowerCase();
+            var foundCountry = countryData.find(country => country.name.toLowerCase() === searchInput);
+
+            if (foundCountry && foundCountry.latitude && foundCountry.longitude) {
+                map.setView([foundCountry.latitude, foundCountry.longitude], 5); // Adjust zoom level as needed
+                L.popup()
+                    .setLatLng([foundCountry.latitude, foundCountry.longitude])
+                    .setContent(`
+                        <b>${foundCountry.name}</b><br>
+                        Population: ${foundCountry['Population, total']}<br>
+                       
+                        Population growth: ${foundCountry['Population growth']}%<br>
+                        Net migration: ${foundCountry['Net migration']}<br>
+                       
+                       Human Development Index (HDI): ${foundCountry['HDI'] ? foundCountry['HDI'].toFixed(2) : 'N/A'}
+                    `)
+                    .openOn(map);
+            } else {
+                alert('Country not found or no geo-location available.');
+            }
+        }
+    </script>
+</body>
+</html>

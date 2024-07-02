@@ -1,25 +1,47 @@
-# Data Engineer Challenge
+# World Bank Country Data API
 
-Thank you for your interest in the Data Engineer position at AAK Tele-Science. This coding challenge is designed to assess your skills in data engineering. Please follow the instructions below and deliver your work on a GitHub repository.
+This repository provides a FastAPI-based web application to serve World Bank country data and display it on an interactive map.
 
-# Instructions
-1. Scrape this website https://data.worldbank.org/country to obtain the list of countries and any data you see relevant for each country.
-2. Create an API using FastAPI that can return the data of a country.
+## Features
 
-# Review Criteria
-1. Method used for web scraping.
-2. How the data is stored and the ETL process applied before using it.
-3. The data chosen to show on the API.
-4. Readability and performance of the code.
+- Retrieve country data via API endpoints
+- Display country data on an interactive map
+- Search functionality to locate specific countries on the map
 
-# Bonus Points
-Showcase creativity with bonus features or enhancements that add value to the solution. This could include additional data visualizations, comprehensive metadata, a user-friendly API documentation interface, or any other innovative approaches that demonstrate your skills and ingenuity.
+## Prerequisites
 
-## Submission
+- Python 3.7 or higher
+- Git
 
-Once you have completed the challenge, please send us the link to your GitHub repository. Make sure to include any relevant instructions for running the application and any additional notes you'd like to share on the `challenge.md` file.
+## Installation
 
-> [!IMPORTANT]
-> You will have 5 days to complete this challenge.
+1. **Clone the repository:**
 
-Thank you, and good luck!
+   git clone https://github.com/jmajety-lab/data_engineer_challenge.git
+   cd data_engineer_challenge
+
+2. **Create and activate a virtual environment:**
+
+
+
+    python -m venv venv
+    source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+
+3. **Install the dependencies:**
+
+
+    pip install -r requirements.txt
+
+4. **Ensure the data file is in place:**
+
+    Make sure you have the worldbank_countries_with_geo_data.csv file in the repository directory. This file should contain the cleaned CSV data with geo-locations.
+
+
+5. **Start the FastAPI server:**
+
+
+    uvicorn main:app --reload
+
+**Access the application:**
+
+    Open your web browser (Google chrome is recommended) and navigate to http://127.0.0.1:8000/map to see the interactive map.
