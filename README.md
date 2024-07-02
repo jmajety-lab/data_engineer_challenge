@@ -44,4 +44,7 @@ This repository provides a FastAPI-based web application to serve World Bank cou
 
 **Access the application:**
 
-    Open your web browser (Google chrome is recommended) and navigate to http://127.0.0.1:8000/map to see the interactive map.
+
+    Open your web browser (Google chrome is recommended) and navigate to
+    http://127.0.0.1:8000/map 
+    to see the interactive map.
